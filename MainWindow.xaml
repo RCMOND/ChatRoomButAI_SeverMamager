@@ -1,0 +1,207 @@
+﻿<Window x:Class="ServerManager.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="聊天室管理客户端" Height="700" Width="950"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 服务器连接 & 清空消息 -->
+        <GroupBox Header="服务器连接" Grid.Row="0">
+            <StackPanel>
+                <DockPanel Margin="0,5">
+                    <TextBlock Text="服务器地址：" Width="80" VerticalAlignment="Center"/>
+                    <TextBox x:Name="txtServerUrl" Text="http://192.168.1.100:25565" Margin="5,0"/>
+                </DockPanel>
+                <StackPanel Orientation="Horizontal" Margin="5">
+                    <Button x:Name="btnConnect" Content="连接" Width="60" Height="25" Click="BtnConnect_Click"/>
+                    <Button x:Name="btnDisconnect" Content="断开" Width="60" Height="25" Click="BtnDisconnect_Click" IsEnabled="False" Margin="10,0,0,0"/>
+                    <TextBlock x:Name="txtConnectionStatus" Foreground="Gray" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                    <Button x:Name="btnClearMessages" Content="清空消息" Width="80" Height="25" Click="BtnClearMessages_Click" IsEnabled="False" Margin="20,0,0,0"/>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- 管理员登录 -->
+        <GroupBox Header="管理员登录" Grid.Row="1" Margin="0,10,0,0">
+            <StackPanel>
+                <DockPanel Margin="0,5">
+                    <TextBlock Text="用户名：" Width="60" VerticalAlignment="Center"/>
+                    <TextBox x:Name="txtAdminUser" Margin="5,0" Width="150"/>
+                </DockPanel>
+                <DockPanel Margin="0,5">
+                    <TextBlock Text="密码：" Width="60" VerticalAlignment="Center"/>
+                    <PasswordBox x:Name="txtAdminPassword" Margin="5,0" Width="150"/>
+                </DockPanel>
+                <StackPanel Orientation="Horizontal" Margin="5">
+                    <Button x:Name="btnLogin" Content="登录" Width="60" Height="25" Click="BtnLogin_Click"/>
+                    <Button x:Name="btnRegister" Content="注册" Width="60" Height="25" Click="BtnRegister_Click" Margin="10,0,0,0"/>
+                    <TextBlock x:Name="txtLoginStatus" Foreground="Gray" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- 公告设置 -->
+        <GroupBox Header="全局公告" Grid.Row="2" Margin="0,10,0,0">
+            <StackPanel>
+                <DockPanel Margin="0,5">
+                    <TextBlock Text="公告内容：" Width="80" VerticalAlignment="Center"/>
+                    <TextBox x:Name="txtAnnouncement" TextWrapping="Wrap" MinHeight="50" Margin="5,0"/>
+                </DockPanel>
+                <StackPanel Orientation="Horizontal" Margin="5">
+                    <Button x:Name="btnSetAnnouncement" Content="发布/更新公告" Width="100" Height="25" Click="BtnSetAnnouncement_Click"/>
+                    <Button x:Name="btnClearAnnouncement" Content="清除公告" Width="100" Height="25" Click="BtnClearAnnouncement_Click" Margin="10,0,0,0"/>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- 信息标签页 -->
+        <TabControl Grid.Row="3" Margin="0,10,0,0">
+            <!-- 在线用户管理 -->
+            <TabItem Header="在线用户">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <TextBlock Text="禁言时长：" VerticalAlignment="Center"/>
+                        <ComboBox x:Name="cmbMuteMinutes" Width="60" SelectedIndex="1">
+                            <ComboBoxItem Content="1分"/>
+                            <ComboBoxItem Content="5分"/>
+                            <ComboBoxItem Content="10分"/>
+                            <ComboBoxItem Content="30分"/>
+                            <ComboBoxItem Content="60分"/>
+                        </ComboBox>
+                    </StackPanel>
+                    <ListView x:Name="lvOnlineUsers" Grid.Row="1" Margin="5">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="用户名" Width="120" DisplayMemberBinding="{Binding Username}"/>
+                                <GridViewColumn Header="状态" Width="100">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding StatusText}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="操作" Width="220">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Button Content="踢出" Tag="{Binding Username}" Click="KickUser_Click" Width="40" Margin="2"/>
+                                                <Button Content="禁言" Tag="{Binding Username}" Click="MuteUser_Click" Width="40" Margin="2"/>
+                                                <Button Content="{Binding BanButtonText}" Tag="{Binding Username}" Click="BanUser_Click" Width="50" Margin="2"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Grid>
+            </TabItem>
+
+            <!-- 封禁用户列表 -->
+            <TabItem Header="封禁用户">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Button x:Name="btnRefreshBannedUsers" Content="刷新" Width="60" Height="25" Click="BtnRefreshBannedUsers_Click" HorizontalAlignment="Left" Margin="5"/>
+                    <ListView x:Name="lvBannedUsers" Grid.Row="1" Margin="5">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="用户名" Width="150" DisplayMemberBinding="{Binding Username}"/>
+                                <GridViewColumn Header="操作" Width="80">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="解封" Tag="{Binding Username}" Click="UnbanUserFromList_Click"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Grid>
+            </TabItem>
+
+            <!-- 播放列表管理 -->
+            <TabItem Header="播放列表">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Button x:Name="btnRefreshPlaylist" Content="刷新" Width="60" Height="25" Click="BtnRefreshPlaylist_Click" HorizontalAlignment="Left" Margin="5"/>
+                    <ListView x:Name="lvPlaylist" Grid.Row="1" Margin="5">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="标题" Width="150" DisplayMemberBinding="{Binding Title}"/>
+                                <GridViewColumn Header="URL" Width="250" DisplayMemberBinding="{Binding Url}"/>
+                                <GridViewColumn Header="操作" Width="80">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="删除" Tag="{Binding Id}" Click="DeletePlaylistItem_Click"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Grid>
+            </TabItem>
+
+            <!-- IP 管理 -->
+            <TabItem Header="IP管理">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <TextBlock Text="IP地址：" VerticalAlignment="Center"/>
+                        <TextBox x:Name="txtBanIp" Width="150" Margin="5,0"/>
+                        <TextBlock Text="原因：" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        <TextBox x:Name="txtBanReason" Width="150" Margin="5,0"/>
+                        <Button x:Name="btnAddBanIp" Content="封禁" Width="60" Height="25" Click="BtnAddBanIp_Click"/>
+                    </StackPanel>
+                    <ListView x:Name="lvBannedIps" Grid.Row="1" Margin="5">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="IP地址" Width="150" DisplayMemberBinding="{Binding Ip}"/>
+                                <GridViewColumn Header="原因" Width="200" DisplayMemberBinding="{Binding Reason}"/>
+                                <GridViewColumn Header="操作" Width="80">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="解封" Tag="{Binding Ip}" Click="UnbanIp_Click"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Grid>
+            </TabItem>
+
+            <!-- 服务器日志 -->
+            <TabItem Header="服务器日志">
+                <ListBox x:Name="lstLogs" FontFamily="Consolas" FontSize="11"/>
+            </TabItem>
+        </TabControl>
+
+        <!-- 状态栏 -->
+        <StatusBar Grid.Row="4">
+            <StatusBarItem>
+                <TextBlock x:Name="txtStatus" Text="未连接"/>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>
